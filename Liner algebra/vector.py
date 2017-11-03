@@ -8,6 +8,7 @@ class Vector():
 
     CAN_NOT_OPERATION_ZERO_VECTOR = 'Can not operation zero vector'
     NO_UNIQUE_ORTHOGONAL_COMPONENT_MSG = 'No unique orthogonal component'
+    ONLY_DEFINED_IN_TWO_THREE_DIMS_MSG = 'only define in two or three dims'
 
     def __init__(self,coordinates):
         try:
@@ -40,6 +41,8 @@ class Vector():
 
     def dot(self,v):
         return sum([x * y for x , y in zip(self.coordinates, v.coordinates)])
+
+
 
     def is_parallel_to(self,v):
 
@@ -78,6 +81,8 @@ class Vector():
             else:
                 raise e
 
+
+
     def component_parallel_to(self,basic):
         try:
             u = basic.normalized()
@@ -93,12 +98,37 @@ class Vector():
             projection = self.component_parallel_to(basic)
             return self.minus(projection)
 
-
         except Exception as e:
             if str(e) == self.NO_UNIQUE_ORTHOGONAL_COMPONENT_MSG:
                 raise Exception(self.NO_UNIQUE_ORTHOGONAL_COMPONENT_MSG)
             else:
                 raise e
+    # cross
+    def cross(self,v):
+        try:
+            x_1,y_1,z_1 = self.coordinates
+            x_2,y_2,z_2 = v.coordinates
+            new_coordinates = [y_1 * z_2 - z_1 * y_2,
+                               -(x_1 * z_2 - z_1 * x_2),
+                               x_1 * y_2 - y_1 * x_2]
+            return Vector(new_coordinates)
+        except ValueError as e:
+            msg = str(e)
+            if msg == 'need more than 2 values to unpack':
+                # if has less than 3 count add 0 in coordinates
+                self_embedded_R3 = Vector(self.coordinates + (0,))
+                print self_embedded_R3
+                v_embedded_R3    = Vector(v.coordinates + (0,))
+                return self_embedded_R3.cross(v_embedded_R3)
+            elif msg == 'need more than 1 value to unpack':
+                raise Exception(self.ONLY_DEFINED_IN_TWO_THREE_DIMS_MSG)
+            else:
+                print str(e)
+    def area_of_parallelogram_with(self, v):
+        cross_vector = self.cross(v)
+        return cross_vector.magnitude()
+    def area_of_triangle_with(self, v):
+        return self.area_of_parallelogram_with(v) / 2
 
 
     def plus(self,v):
@@ -115,11 +145,16 @@ class Vector():
         return Vector([x * c for x in self.coordinates])
 
 
-v1 = Vector([3.039,1.879])
-v2 = Vector([0.825,2.036])
+v1 = Vector([8.462, 7.893, -8.187])
+v2 = Vector([6.984, -5.975, 4.778])
 
-v3 = Vector([-9.88,-3.264,-8.159])
-v4 = Vector([-2.155,-9.353,-9.473])
+v3 = Vector([-8.987, -9.838, 5.031])
+v4 = Vector([-4.268, -1.861, -8.866])
 
-print v3.component_orthogonal_to(v4)
-print v1.component_parallel_to(v2)
+print v1.cross(v2)
+print v3.area_of_parallelogram_with(v4)
+# v3 = Vector([-9.88,-3.264,-8.159])
+# v4 = Vector([-2.155,-9.353,-9.473])
+#
+# print v3.component_orthogonal_to(v4)
+# print v1.component_parallel_to(v2)
