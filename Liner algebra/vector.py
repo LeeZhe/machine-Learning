@@ -7,6 +7,7 @@ getcontext().prec = 30
 class Vector():
 
     CAN_NOT_OPERATION_ZERO_VECTOR = 'Can not operation zero vector'
+    NO_UNIQUE_ORTHOGONAL_COMPONENT_MSG = 'No unique orthogonal component'
 
     def __init__(self,coordinates):
         try:
@@ -77,6 +78,29 @@ class Vector():
             else:
                 raise e
 
+    def component_parallel_to(self,basic):
+        try:
+            u = basic.normalized()
+            size_vector = self.dot(u) #component vector size
+            return u.times_scalar(size_vector)
+        except Exception as e:
+            if str(e) == self.CAN_NOT_OPERATION_ZERO_VECTOR:
+                raise Exception(self.CAN_NOT_OPERATION_ZERO_VECTOR)
+            else:
+                raise e
+    def component_orthogonal_to(self,basic):
+        try:
+            projection = self.component_parallel_to(basic)
+            return self.minus(projection)
+
+
+        except Exception as e:
+            if str(e) == self.NO_UNIQUE_ORTHOGONAL_COMPONENT_MSG:
+                raise Exception(self.NO_UNIQUE_ORTHOGONAL_COMPONENT_MSG)
+            else:
+                raise e
+
+
     def plus(self,v):
         new_coordinates = [x + y for x ,y in zip(self.coordinates,v.coordinates)]
         return Vector(new_coordinates)
@@ -90,7 +114,12 @@ class Vector():
     def times_scalar(self, c):
         return Vector([x * c for x in self.coordinates])
 
-v1 = Vector([2.118,4.827])
-v2 = Vector([0,0])
-print v1.is_orthogonal_to(v2)
-print v1.is_parallel_to(v2)
+
+v1 = Vector([3.039,1.879])
+v2 = Vector([0.825,2.036])
+
+v3 = Vector([-9.88,-3.264,-8.159])
+v4 = Vector([-2.155,-9.353,-9.473])
+
+print v3.component_orthogonal_to(v4)
+print v1.component_parallel_to(v2)
