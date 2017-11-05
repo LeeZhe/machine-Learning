@@ -108,16 +108,19 @@ class Vector():
         try:
             x_1,y_1,z_1 = self.coordinates
             x_2,y_2,z_2 = v.coordinates
+
+            # print self.coordinates,'\n',v.coordinates
+
             new_coordinates = [y_1 * z_2 - z_1 * y_2,
                                -(x_1 * z_2 - z_1 * x_2),
                                x_1 * y_2 - y_1 * x_2]
             return Vector(new_coordinates)
+
         except ValueError as e:
             msg = str(e)
             if msg == 'need more than 2 values to unpack':
                 # if has less than 3 count add 0 in coordinates
                 self_embedded_R3 = Vector(self.coordinates + (0,))
-                print self_embedded_R3
                 v_embedded_R3    = Vector(v.coordinates + (0,))
                 return self_embedded_R3.cross(v_embedded_R3)
             elif msg == 'need more than 1 value to unpack':
@@ -128,7 +131,7 @@ class Vector():
         cross_vector = self.cross(v)
         return cross_vector.magnitude()
     def area_of_triangle_with(self, v):
-        return self.area_of_parallelogram_with(v) / 2
+        return self.area_of_parallelogram_with(v) / Decimal(2)
 
 
     def plus(self,v):
@@ -145,16 +148,18 @@ class Vector():
         return Vector([x * c for x in self.coordinates])
 
 
-v1 = Vector([8.462, 7.893, -8.187])
-v2 = Vector([6.984, -5.975, 4.778])
+if __name__ == 'main()':
+    v1 = Vector([8.462, 7.893])
+    v2 = Vector([6.984, -5.975])
 
-v3 = Vector([-8.987, -9.838, 5.031])
-v4 = Vector([-4.268, -1.861, -8.866])
+    v3 = Vector([-8.987, -9.838, 5.031])
+    v4 = Vector([-4.268, -1.861, -8.866])
 
-print v1.cross(v2)
-print v3.area_of_parallelogram_with(v4)
-# v3 = Vector([-9.88,-3.264,-8.159])
-# v4 = Vector([-2.155,-9.353,-9.473])
-#
-# print v3.component_orthogonal_to(v4)
-# print v1.component_parallel_to(v2)
+    # print v1.cross(v2)
+    print v3.area_of_parallelogram_with(v4)
+    # v3 = Vector([-9.88,-3.264,-8.159])
+    # v4 = Vector([-2.155,-9.353,-9.473])
+    #
+    # print v3.component_orthogonal_to(v4)
+    # print v1.component_parallel_to(v2)
+
