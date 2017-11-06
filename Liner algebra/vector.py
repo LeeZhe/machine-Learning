@@ -44,30 +44,30 @@ class Vector():
 
 
 
-    def is_parallel_to(self,v):
+    def is_parallel_to(self,v,eps = 1e-3):
 
-        return (self.is_zero() or v.is_zero() or self.angle_with(v) == 0 or self.angle_with(v) == pi)
+        return (self.is_zero() or v.is_zero() or self.angle_with(v) < eps or self.angle_with(v) == pi)
 
     def is_orthogonal_to(self,v, tolerance = 1e-10):
 
-        return self.dot(v) < tolerance
+        return abs(self.dot(v)) < tolerance
 
     def is_zero(self, tolerance = 1e-10):
         return self.magnitude() < tolerance
 
-    def angle_with(self,v,in_degrees = False,tolerance = 1e-10):
+    def angle_with(self,v,in_degrees = False,tolerance = 1e-3):
         try:
             u1 = self.normalized()
             u2 = v.normalized()
+
 # ensure u1 parallel u2 cause acos math Exception
             if u1.dot(u2) - 1 > 0:
-                print 'is run - 1'
                 return 0.0
 
             if u1.dot(u2) + 1 < 0:
                 return pi
-
             angle_with_radians = acos(u1.dot(u2))
+            # print angle_with_radians
             if in_degrees:
                 degrees_per_radians =  float(Decimal(180.)) / pi
                 return degrees_per_radians * angle_with_radians
@@ -117,13 +117,13 @@ class Vector():
             if msg == 'need more than 2 values to unpack':
                 # if has less than 3 count add 0 in coordinates
                 self_embedded_R3 = Vector(self.coordinates + (0,))
-                print self_embedded_R3
+                # print self_embedded_R3
                 v_embedded_R3    = Vector(v.coordinates + (0,))
                 return self_embedded_R3.cross(v_embedded_R3)
             elif msg == 'need more than 1 value to unpack':
                 raise Exception(self.ONLY_DEFINED_IN_TWO_THREE_DIMS_MSG)
             else:
-                print str(e)
+                raise str(e)
     def area_of_parallelogram_with(self, v):
         cross_vector = self.cross(v)
         return cross_vector.magnitude()
@@ -145,16 +145,17 @@ class Vector():
         return Vector([x * c for x in self.coordinates])
 
 
-v1 = Vector([8.462, 7.893, -8.187])
-v2 = Vector([6.984, -5.975, 4.778])
+if __name__ == "__main__":
+    # v2 = Vector([6.984, -5.975, 4.778])
+    # v1 = Vector([8.462, 7.893, -8.187])
 
-v3 = Vector([-8.987, -9.838, 5.031])
-v4 = Vector([-4.268, -1.861, -8.866])
+    # v3 = Vector([-8.987, -9.838, 5.031])
+    # v4 = Vector([-4.268, -1.861, -8.866])
 
-print v1.cross(v2)
-print v3.area_of_parallelogram_with(v4)
-# v3 = Vector([-9.88,-3.264,-8.159])
-# v4 = Vector([-2.155,-9.353,-9.473])
-#
-# print v3.component_orthogonal_to(v4)
-# print v1.component_parallel_to(v2)
+    # print v1.cross(v2)
+    # print v3.area_of_parallelogram_with(v4)
+    v3 = Vector([-9.88,-3.264,-8.159])
+    v4 = Vector([-2.155,-9.353,-9.473])
+    #
+    print v3.component_orthogonal_to(v4)
+    # print v1.component_parallel_to(v2)
