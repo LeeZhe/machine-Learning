@@ -15,10 +15,6 @@ class Plane(Line):
 
 
 
-
-
-
-
 if __name__ == '__main__':
     p1 = Plane(normal_vector=Vector(['-0.412','3.806','0.728']),contant_term='-3.46')
     p2 = Plane(normal_vector=Vector(['1.03', '-9.515', '-1.82']),contant_term='8.65')
