@@ -6,44 +6,43 @@ getcontext().prec = 30
 
 class Line(object):
 
-    NO_NONZERO_ELTS_FOUND_MSG = 'No nonzero elements found'
+    NO_NONE_ZERO_ELTS_FOUND_MSG = 'No nonzero elements found'
 
-    def __init__(self,normal_vector = None,contant_term = None,dimension = 2):
+    def __init__(self,normal_vector = None,constant_term = None,dimension = 2):
 
         self.dimension = dimension
         if not normal_vector:
-            normal_vector = ['0'] * self.dimension
+            normal_vector = Vector(['0'] * self.dimension)
         self.normal_vector = normal_vector
 
         # self.dimension = len(normal_vector.coordinates)
 
-        if not contant_term:
-            contant_term = Decimal('0')
-        self.contant_term = Decimal(contant_term)
+        if not constant_term:
+            constant_term = Decimal('0')
+        self.constant_term = Decimal(constant_term)
         self.set_basepoint()
 
     def set_basepoint(self):
         try:
             n = self.normal_vector
-            c = self.contant_term
+            c = self.constant_term
             basepoint_coors = ['0'] * self.dimension
             inital_index = Line.first_none_zero_index(n.coordinates)
-            inital_coefficient = n.coordinates[inital_index]
+            inital_coefficient = n[inital_index]
             basepoint_coors[inital_index] = c / inital_coefficient
             self.basepoint = Vector(basepoint_coors)
         except Exception as e:
-            if str(e) == Line.NO_NONZERO_ELTS_FOUND_MSG:
+            if str(e) == Line.NO_NONE_ZERO_ELTS_FOUND_MSG:
                 self.basepoint = None
             else:
                 raise e
-
     def __eq__(self, ell):
 
         if self.normal_vector.is_zero():
             if not ell.normal_vector.is_zero():
                 return False
             else:
-                diff = self.contant_term - ell.contant_term
+                diff = self.constant_term - ell.constant_term
                 return Mydecimal(diff).is_near_zero()
         elif ell.normal_vector.is_zero():
             return False
@@ -132,12 +131,12 @@ class Line(object):
             output = ' '.join(terms)
 
         except Exception as e:
-            if str(e) == self.NO_NONZERO_ELTS_FOUND_MSG:
+            if str(e) == self.NO_NONE_ZERO_ELTS_FOUND_MSG:
                 output = '0'
             else:
                 raise e
 
-        constant = round(self.contant_term, num_decimal_places)
+        constant = round(self.constant_term, num_decimal_places)
         if constant % 1 == 0:
             constant = int(constant)
         output += ' = {}'.format(constant)
@@ -157,7 +156,7 @@ class Line(object):
         for index , item in enumerate(iterable):
             if not Mydecimal(item).is_near_zero():
                 return index
-        raise Exception(Line.NO_NONZERO_ELTS_FOUND_MSG)
+        raise Exception(Line.NO_NONE_ZERO_ELTS_FOUND_MSG)
 
 
 

@@ -27,6 +27,9 @@ class Vector():
     def __str__(self):
         return 'Vector: {0}'.format(self.coordinates)
 
+    def __getitem__(self, i):
+        return self.coordinates[i]
+
 #vector operation
     def magnitude(self):
          square_coordinate = [x ** 2 for x in self.coordinates]
