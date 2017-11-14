@@ -162,6 +162,7 @@ class LinearSystem(object):
     def do_gaussian_elimination_and_extract_solution(self):
         rref = self.compute_rref()
 
+        print rref
         rref.raise_exception_if_contradictory_equation()
 
         direction_vectors = rref.extract_direction_vectors_for_parametrization()
@@ -213,7 +214,7 @@ class LinearSystem(object):
                     break
                 vector_coords[pivot_var] = -p.normal_vector[free_var]
             direction_vectors.append(Vector(vector_coords))
-
+            # print direction_vectors[0]
         return  direction_vectors
 
     def extract_basepoint_for_parametrization(self):
@@ -227,7 +228,7 @@ class LinearSystem(object):
             if pivot_var < 0:
                 break
             base_point_coords[pivot_var] = p.constant_term
-
+        # print Vector(base_point_coords)
         return Vector(base_point_coords)
 
 
@@ -272,17 +273,19 @@ class Parametrization(object):
             raise Exception(self.BASEPT_AND_DIR_VECTORS_MUST_BE_IN_SAME_DIM_MSG)
 
     def __str__(self):
-
-        def write_coefficient(coefficient,is_initial_term = False):
+        num_decimal_places = 3
+        def write_coefficient(ponit_x,coefficient,is_initial_term = False):
             coefficient = round(coefficient, num_decimal_places)
             if coefficient % 1 == 0:
                 coefficient = int(coefficient)
 
             output = ''
 
+            output += str(round(ponit_x,num_decimal_places)) + ' '
+
             if coefficient < 0:
                 output += '-'
-            if coefficient > 0 and not is_initial_term:
+            if coefficient >= 0 and not is_initial_term:
                 output += '+'
 
             if not is_initial_term:
@@ -294,15 +297,19 @@ class Parametrization(object):
 
         try:
 
-            for n in self.direction_vectors:
-                print n
-            print self.basepoint
+            temp = []
 
-            t_coordinates = []
-            num_equations = len(self.direction_vectors)
-            for x in range(self.dimension):
-                v_coors = [0] * (num_equations + 1)
-                v_coors[0] = self.basepoint[x]
+            for n in self.direction_vectors:
+                initial_index = Plane.first_none_zero_index(n)
+                access = ['x', 'y', 'z']
+                terms = [write_coefficient(self.basepoint[i],n[i],is_initial_term=(i == initial_index)) + 't' for i in range(self.dimension)]
+
+                temp = ['{} = {}'.format(access[i],x) for i , x in enumerate(terms)]
+
+            return '\n'.join(temp)
+
+            pass
+
         except Exception as e:
             raise e
 
@@ -319,8 +326,8 @@ class MyDecimal(Decimal):
 
 
 if __name__ == '__main__':
-    p1 = Plane(normal_vector=Vector([.786, .786, .588]), constant_term = .714)
-    p2 = Plane(normal_vector=Vector([.138, -.138, .244]), constant_term = .319)
+    p1 = Plane(normal_vector=Vector([.786, .786, .588]), constant_term = -.714)
+    p2 = Plane(normal_vector=Vector([-.138, -.138, .244]), constant_term = .319)
 
     sys =  LinearSystem([p1,p2])
 
