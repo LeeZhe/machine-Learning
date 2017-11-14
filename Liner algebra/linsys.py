@@ -152,7 +152,7 @@ class LinearSystem(object):
             return self.do_gaussian_elimination_and_extract_solution()
 
         except Exception as e:
-            if str(e) in [self.INF_SOLUTIONS_MSG,self.NO_SOLUTIONS_MSG]:
+            if str(e) == self.NO_SOLUTIONS_MSG:
                 return str(e)
             else:
                 raise e
@@ -163,12 +163,11 @@ class LinearSystem(object):
         rref = self.compute_rref()
 
         rref.raise_exception_if_contradictory_equation()
-        rref.raise_exception_if_too_few_pivots()
 
-        num_variables = rref.dimension
-        solution_coordinates = [rref.planes[i].constant_term for i in range(num_variables)]
+        direction_vectors = rref.extract_direction_vectors_for_parametrization()
+        basepoint = rref.extract_basepoint_for_parametrization()
 
-        return Vector(solution_coordinates)
+        return Parametrization(basepoint, direction_vectors)
 
 
 
@@ -197,19 +196,39 @@ class LinearSystem(object):
 
 
 
-    # def extract_base_point_for_parmae_trization(self):
-    #     num_variables = self.dimension
-    #     pivot_indices = self.indices_of_first_nonzero_terms_in_each_row()
-    #
-    #     base_point_coords = [0] + num_variables
-    #
-    #     for i , p in enumerate(self.planes):
-    #         pivot_var = pivot_indices[i]
-    #         if pivot_var < 0:
-    #             break
-    #         base_point_coords[pivot_var] = p.constant_terms
-    #
-    #     return Vector(base_point_coords)
+    def extract_direction_vectors_for_parametrization(self):
+        num_variables = self.dimension
+        pivot_indices = self.indices_of_first_nonzero_terms_in_each_row()
+        free_variable_indices = set(range(num_variables)) - set(pivot_indices)
+
+        direction_vectors = []
+
+        for free_var in free_variable_indices:
+            vector_coords = [0] * num_variables
+            vector_coords[free_var] = 1
+
+            for i,p in enumerate(self.planes):
+                pivot_var = pivot_indices[i]
+                if pivot_var < 0:
+                    break
+                vector_coords[pivot_var] = -p.normal_vector[free_var]
+            direction_vectors.append(Vector(vector_coords))
+
+        return  direction_vectors
+
+    def extract_basepoint_for_parametrization(self):
+        num_variables = self.dimension
+        pivot_indices = self.indices_of_first_nonzero_terms_in_each_row()
+
+        base_point_coords = [0] * num_variables
+
+        for i , p in enumerate(self.planes):
+            pivot_var = pivot_indices[i]
+            if pivot_var < 0:
+                break
+            base_point_coords[pivot_var] = p.constant_term
+
+        return Vector(base_point_coords)
 
 
 
@@ -235,6 +254,64 @@ class LinearSystem(object):
         return ret
 
 
+class Parametrization(object):
+
+    BASEPT_AND_DIR_VECTORS_MUST_BE_IN_SAME_DIM_MSG = 'The basepoint and direction vectors should all live in the same dimension'
+
+    def __init__(self, basepoint, direction_vectors):
+
+        self.basepoint = basepoint
+        self.direction_vectors = direction_vectors
+        self.dimension = self.basepoint.dimension
+
+        try:
+            for v in direction_vectors:
+                assert v.dimension == self.dimension
+
+        except AssertionError:
+            raise Exception(self.BASEPT_AND_DIR_VECTORS_MUST_BE_IN_SAME_DIM_MSG)
+
+    def __str__(self):
+
+        def write_coefficient(coefficient,is_initial_term = False):
+            coefficient = round(coefficient, num_decimal_places)
+            if coefficient % 1 == 0:
+                coefficient = int(coefficient)
+
+            output = ''
+
+            if coefficient < 0:
+                output += '-'
+            if coefficient > 0 and not is_initial_term:
+                output += '+'
+
+            if not is_initial_term:
+                output += ' '
+
+            if abs(coefficient) != 1:
+                output += '{}'.format(abs(coefficient))
+            return output
+
+        try:
+
+            for n in self.direction_vectors:
+                print n
+            print self.basepoint
+
+            t_coordinates = []
+            num_equations = len(self.direction_vectors)
+            for x in range(self.dimension):
+                v_coors = [0] * (num_equations + 1)
+                v_coors[0] = self.basepoint[x]
+        except Exception as e:
+            raise e
+
+        return 'test'
+
+
+
+
+
 class MyDecimal(Decimal):
     def is_near_zero(self, eps=1e-10):
         return abs(self) < eps
@@ -242,29 +319,30 @@ class MyDecimal(Decimal):
 
 
 if __name__ == '__main__':
-    p1 = Plane(normal_vector=Vector([5.862, 1.178, -10.366]), constant_term = -8.15)
-    p2 = Plane(normal_vector=Vector([-2.931, -.589, 5.183]), constant_term = -4.075)
+    p1 = Plane(normal_vector=Vector([.786, .786, .588]), constant_term = .714)
+    p2 = Plane(normal_vector=Vector([.138, -.138, .244]), constant_term = .319)
+
     sys =  LinearSystem([p1,p2])
 
     print sys.compute_solution()
-
-    p1 = Plane(normal_vector=Vector([8.631, 5.112, -1.816]), constant_term=-5.113)
-    p2 = Plane(normal_vector=Vector([4.315, 11.132, -5.27]), constant_term=-6.775)
-    p3 = Plane(normal_vector=Vector([-2.158, 3.01, -1.727]), constant_term=-.831)
-
-    sys = LinearSystem([p1,p2,p3])
-    print sys.compute_solution()
-
-    p1 = Plane(normal_vector=Vector([5.262, 2.739, -9.878]), constant_term=-3.441)
-    p2 = Plane(normal_vector=Vector([5.111, 6.358, 7.638]), constant_term=-2.152)
-    p3 = Plane(normal_vector=Vector([2.016, -9.924, -1.367]), constant_term=-9.278)
-    p4 = Plane(normal_vector=Vector([2.167, -13.543, -18.883]), constant_term=-10.567)
-
-    sys = LinearSystem([p1, p2, p3,p4])
-
-    print sys.compute_triangular_form()
-
-    print sys.compute_solution()
+    #
+    # p1 = Plane(normal_vector=Vector([8.631, 5.112, -1.816]), constant_term=-5.113)
+    # p2 = Plane(normal_vector=Vector([4.315, 11.132, -5.27]), constant_term=-6.775)
+    # p3 = Plane(normal_vector=Vector([-2.158, 3.01, -1.727]), constant_term=-.831)
+    #
+    # sys = LinearSystem([p1,p2,p3])
+    # print sys.compute_solution()
+    #
+    # p1 = Plane(normal_vector=Vector([5.262, 2.739, -9.878]), constant_term=-3.441)
+    # p2 = Plane(normal_vector=Vector([5.111, 6.358, 7.638]), constant_term=-2.152)
+    # p3 = Plane(normal_vector=Vector([2.016, -9.924, -1.367]), constant_term=-9.278)
+    # p4 = Plane(normal_vector=Vector([2.167, -13.543, -18.883]), constant_term=-10.567)
+    #
+    # sys = LinearSystem([p1, p2, p3,p4])
+    #
+    # print sys.compute_triangular_form()
+    #
+    # print sys.compute_solution()
 
 
     # p1 = Plane(normal_vector=Vector(['1', '1', '1']), constant_term='1')

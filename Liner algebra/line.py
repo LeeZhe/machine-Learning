@@ -126,8 +126,9 @@ class Line(object):
             initial_index = Line.first_none_zero_index(n.coordinates)
             access = ['x','y','z']
 
-            terms = [write_coefficient(n.coordinates[i], is_initial_term=(i == initial_index)) + access[i]
+            terms = [write_coefficient(n.coordinates[i], is_initial_term = (i == initial_index)) + access[i]
                      for i in range(self.dimension) if round(n.coordinates[i], num_decimal_places) != 0]
+            print terms
             output = ' '.join(terms)
 
         except Exception as e:
