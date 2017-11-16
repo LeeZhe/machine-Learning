@@ -162,7 +162,6 @@ class LinearSystem(object):
     def do_gaussian_elimination_and_extract_solution(self):
         rref = self.compute_rref()
 
-        print rref
         rref.raise_exception_if_contradictory_equation()
 
         direction_vectors = rref.extract_direction_vectors_for_parametrization()
@@ -200,8 +199,8 @@ class LinearSystem(object):
     def extract_direction_vectors_for_parametrization(self):
         num_variables = self.dimension
         pivot_indices = self.indices_of_first_nonzero_terms_in_each_row()
-        free_variable_indices = set(range(num_variables)) - set(pivot_indices)
 
+        free_variable_indices = set(range(num_variables)) - set(pivot_indices)
         direction_vectors = []
 
         for free_var in free_variable_indices:
@@ -288,8 +287,8 @@ class Parametrization(object):
             if coefficient >= 0 and not is_initial_term:
                 output += '+'
 
-            if not is_initial_term:
-                output += ' '
+            # if not is_initial_term:
+            output += ' '
 
             if abs(coefficient) != 1:
                 output += '{}'.format(abs(coefficient))
@@ -297,9 +296,15 @@ class Parametrization(object):
 
         try:
 
+            if len(self.direction_vectors) == 0:
+                return '{}'.format(self.basepoint)
+
             temp = []
 
             for n in self.direction_vectors:
+
+                print n
+
                 initial_index = Plane.first_none_zero_index(n)
                 access = ['x', 'y', 'z']
                 terms = [write_coefficient(self.basepoint[i],n[i],is_initial_term=(i == initial_index)) + 't' for i in range(self.dimension)]
@@ -313,9 +318,6 @@ class Parametrization(object):
         except Exception as e:
             raise e
 
-        return 'test'
-
-
 
 
 
@@ -326,12 +328,32 @@ class MyDecimal(Decimal):
 
 
 if __name__ == '__main__':
-    p1 = Plane(normal_vector=Vector([.786, .786, .588]), constant_term = -.714)
-    p2 = Plane(normal_vector=Vector([-.138, -.138, .244]), constant_term = .319)
+    # p1 = Plane(normal_vector=Vector([.786, .786, .588]), constant_term = -.714)
+    # p2 = Plane(normal_vector=Vector([-.138, -.138, .244]), constant_term = .319)
+    #
+    # sys =  LinearSystem([p1,p2])
+    #
+    # print sys.compute_solution()
+    #
+    # p1 = Plane(normal_vector=Vector([8.631, 5.112, -1.816]), constant_term=-5.113)
+    # p2 = Plane(normal_vector=Vector([4.315, 11.132, -5.27]), constant_term=-6.775)
+    # p3 = Plane(normal_vector=Vector([-2.158, 3.01, -1.727]), constant_term=-.831)
+    #
+    # sys = LinearSystem([p1, p2, p3])
+    #
+    # print sys.compute_solution()
 
-    sys =  LinearSystem([p1,p2])
+    p1 = Plane(normal_vector=Vector([0.935, 1.76, -9.365]), constant_term=-9.955)
+    p2 = Plane(normal_vector=Vector([0.187, 0.352, -1.873]), constant_term=-1.991)
+    p3 = Plane(normal_vector=Vector([0.374, 0.704, -3.746]), constant_term=-3.982)
+    p4 = Plane(normal_vector=Vector([-0.561, -1.056, -5.619]), constant_term=5.973)
+
+    sys = LinearSystem([p1, p2, p3,p4])
+
+    # print  sys.compute_rref()
 
     print sys.compute_solution()
+
     #
     # p1 = Plane(normal_vector=Vector([8.631, 5.112, -1.816]), constant_term=-5.113)
     # p2 = Plane(normal_vector=Vector([4.315, 11.132, -5.27]), constant_term=-6.775)
