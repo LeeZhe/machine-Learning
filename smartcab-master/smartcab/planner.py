@@ -32,7 +32,7 @@ class RoutePlanner(object):
         dy = delta_a[1] if abs(delta_a[1]) < abs(delta_b[1]) else delta_b[1]
 
         # First check if destination is at location
-        if dx == 0 and dy == 0:
+        if dx == 0 and dy == 0:next_waypoint
             return None
         
         # Next check if destination is cardinally East or West of location    
